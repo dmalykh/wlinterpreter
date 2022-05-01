@@ -1,4 +1,4 @@
-# # llinterpreter
+# Wllinterpreter
 
 Universal interpreter for simple esoteric languages that uses simple commands. Like brainfuck. Interpreter allows to work with any stack you want and with any cell size you need.
 Because it uses [generics](https://go.dev/doc/tutorial/generics) for working with stack.
