@@ -33,7 +33,7 @@ Finally, you can use it for brainfuck implementation.
 ```go
 
 func Examlpe[S wlinterpreter.CellSize]() {
-	// Get store for internal interpreter @TODO
+	// Get store for internal interpreter 
 	var store = list.New()
 	// Create interpreter and stack
 	var wli = interpreter.NewInterpreter(store)
