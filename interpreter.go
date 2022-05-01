@@ -34,8 +34,10 @@ type Interpreter interface {
 	InternalStorage() Storage
 	// GetHistory returns last executed operators slice. If last < 0 returns full history slice.
 	GetHistory(last int) []byte
-	// Fork current interpreter. Forks
+	// Fork current interpreter and use it. Forks allows to use independent history, that copied for all parents. You can use forks for loops.
 	Fork()
+	// Done closes current fork. If parent exists, current interpreter is parent.
 	Done() error
+	// Clone current interpreter with its settings except history and return it.
 	Clone() Interpreter
 }

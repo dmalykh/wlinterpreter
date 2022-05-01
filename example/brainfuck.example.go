@@ -1,4 +1,4 @@
-package main
+package example
 
 import (
 	"fmt"
@@ -11,12 +11,8 @@ import (
 	"sync"
 )
 
-func main() {
-	Examlpe[int32]()
-}
-
 func Examlpe[S wlinterpreter.CellSize]() {
-	// Get store for internal interpreter @TODO
+	// Get store for internal interpreter
 	var store = list.New()
 	// Create interpreter and stack
 	var wli = interpreter.NewInterpreter(store)
@@ -36,6 +32,7 @@ func Examlpe[S wlinterpreter.CellSize]() {
 		panic(err)
 	}
 
+	// Create waitgroup for reading output
 	var wg = new(sync.WaitGroup)
 	defer wg.Wait()
 	go func() {
@@ -43,14 +40,12 @@ func Examlpe[S wlinterpreter.CellSize]() {
 			wg.Add(1)
 			func(s S) {
 				defer wg.Done()
-				r := rune(s)
-				st := string(r)
-				fmt.Printf("%s", st) //@TODO clean
+				fmt.Printf("%s", string(rune(s)))
 			}(symbol)
 		}
 	}()
 
-	//var program = []byte(`++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.`)
+	// Run program
 	var program = []byte(`++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.`)
 	if err := bf.Run(program...); err != nil {
 		log.Fatalln(err)

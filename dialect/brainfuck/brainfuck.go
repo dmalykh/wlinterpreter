@@ -192,7 +192,7 @@ func (bf *Brainfuck[S]) registerEndJumpOperator() error {
 				return fmt.Errorf(`cann't get value on %d: %w`, sm.GetPosition(bf.stack), err)
 			}
 
-			// If current value is 0, remove current bracket and go to next operator
+			// If current value is 0, done current subprogram and go to next operator
 			if value == 0 {
 				if err := i.Done(); err != nil {
 					return fmt.Errorf(`cann't close fork: %w`, err)
