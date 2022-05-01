@@ -1,13 +1,3 @@
-package wlinterpreter
-
-import (
-	"errors"
-)
-
-type ExecuteFunc func(i Interpreter) error
-
-var ErrUnknownOperator = errors.New(`got unknown operator`)
-
 // Interpreter implements functions to register and execute operator for manipulations with stack.
 // The RegisterOperator method saves relation between operator and ExecuteFunc that should be calls when operator
 // would be detected in execution:
@@ -23,6 +13,16 @@ var ErrUnknownOperator = errors.New(`got unknown operator`)
 // Also, if you need to store some data while Interpreter works you should use InternalStorage() with Storage interface.
 //
 
+package wlinterpreter
+
+import (
+	"errors"
+)
+
+type ExecuteFunc func(i Interpreter) error
+
+var ErrUnknownOperator = errors.New(`got unknown operator`)
+
 type Interpreter interface {
 	// RegisterOperator creates relation between operator and execute. When operator will got at execution, the execute will called.
 	RegisterOperator(operator byte, execute ExecuteFunc) error
@@ -32,6 +32,10 @@ type Interpreter interface {
 	Exec(operator byte) error
 	// InternalStorage return Storage interface for storing data while Interpreter works
 	InternalStorage() Storage
-	// Stack return Stack interface for manipulations with stack while Interpreter works
-	Stack() Stack
+	// GetHistory returns last executed operators slice. If last < 0 returns full history slice.
+	GetHistory(last int) []byte
+	// Fork current interpreter. Forks
+	Fork()
+	Done() error
+	Clone() Interpreter
 }

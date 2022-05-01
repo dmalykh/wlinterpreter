@@ -39,81 +39,56 @@ func TestInterpreter_RegisterOperator(t *testing.T) {
 
 func TestNewInterpreter(t *testing.T) {
 	var storage = mocks.NewStorage(t)
-	var stack = mocks.NewStack(t)
 	t.Run(`use constructor`, func(t *testing.T) {
-		var i = NewInterpreter(stack, storage)
+		var i = NewInterpreter(storage)
 		assert.Equal(t, storage, i.InternalStorage())
-		assert.Equal(t, stack, i.Stack())
 		assert.NoError(t, i.RegisterOperator(byte('o'), func(i wlinterpreter.Interpreter) error { return nil }))
 	})
 	t.Run(`without constructor`, func(t *testing.T) {
 		var i = &Interpreter{
-			stack:           stack,
 			internalStorage: storage,
 		}
 		assert.Equal(t, storage, i.InternalStorage())
-		assert.Equal(t, stack, i.Stack())
 		assert.ErrorIs(t, ErrNilOperatorsMap, i.RegisterOperator(byte('o'), func(i wlinterpreter.Interpreter) error { return nil }))
 	})
 }
 
 func TestInterpreter_Exec(t *testing.T) {
-	type fields struct {
-		operators map[byte]wlinterpreter.ExecuteFunc
-		stack     wlinterpreter.Stack
-	}
-	type args struct {
+
+	tests := []struct {
+		name     string
 		operator byte
 		call     byte
-		execute  wlinterpreter.ExecuteFunc
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr error
+		wantErr  error
 	}{
 		{
-			`Operator exists and works`,
-			args{
-				operator: byte('*'),
-				call:     byte('*'),
-				execute: func(i wlinterpreter.Interpreter) error {
-					i.Stack().Move(0)
-					return nil
-				},
-			},
+			`Operator exists and its func called`,
+			byte('*'),
+			byte('*'),
 			nil,
 		},
 		{
 			`Operator doesn't exists`,
-			args{
-				operator: byte('*'),
-				call:     byte('-'),
-				execute: func(i wlinterpreter.Interpreter) error {
-					i.Stack().Move(0)
-					return nil
-				},
-			},
+			byte('*'),
+			byte('-'),
 			wlinterpreter.ErrUnknownOperator,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var stack = mocks.NewStack(t)
-			if tt.wantErr == nil {
-				stack.On("Move", mock.Anything).Return(tt.args.execute)
-			}
-			i := &Interpreter{
+			var execFunc = mocks.ExecuteFunc{}
+			execFunc.On(`Execute`, mock.Anything).Return(func(i wlinterpreter.Interpreter) error { return nil })
+
+			var i = &Interpreter{
 				operators: make(map[byte]wlinterpreter.ExecuteFunc),
-				stack:     stack,
 			}
-			assert.NoError(t, i.RegisterOperator(tt.args.operator, tt.args.execute))
-			err := i.Exec(tt.args.call)
-			if err != nil {
+			assert.NoError(t, i.RegisterOperator(tt.operator, execFunc.Execute))
+			err := i.Exec(tt.call)
+			if tt.wantErr != nil {
 				assert.ErrorIs(t, err, tt.wantErr)
-				stack.AssertNotCalled(t, `Move`, mock.Anything)
+				execFunc.AssertNotCalled(t, `Execute`, mock.Anything)
 			} else {
-				stack.AssertCalled(t, `Move`, mock.Anything)
+				execFunc.AssertNumberOfCalls(t, `Execute`, 1)
 			}
 		})
 	}
@@ -141,7 +116,7 @@ func TestInterpreter_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var i = NewInterpreter(nil, nil)
+			var i = NewInterpreter(nil)
 			for _, op := range tt.register {
 				assert.NoError(t, i.RegisterOperator(op, func(i wlinterpreter.Interpreter) error { return nil }))
 			}

@@ -1,4 +1,5 @@
-package stack
+// Package slice implements wlinterpreter.Stack interface using slice.
+package slice
 
 import (
 	"fmt"

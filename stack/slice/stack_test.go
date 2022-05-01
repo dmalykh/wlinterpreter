@@ -1,4 +1,4 @@
-package stack
+package slice
 
 import (
 	"github.com/dmalykh/wlinterpreter"

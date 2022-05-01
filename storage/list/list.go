@@ -8,7 +8,7 @@ import (
 var ErrNothingToRemove = errors.New(`nothing to remove, block already empty`)
 
 type element struct {
-	val  int32
+	val  int
 	prev *element
 }
 
@@ -23,10 +23,18 @@ type ListStorage struct {
 	data map[string]*element
 }
 
+func (l *ListStorage) Update(name string, val int) error {
+	if _, exists := l.data[name]; !exists {
+		return wlinterpreter.ErrNotAllocatedBlock
+	}
+	l.data[name].val = val
+	return nil
+}
+
 func (l *ListStorage) Empty(s string) bool {
 	// Check explicitly for better code reading
-	if _, exists := l.data[s]; exists {
-		return false
+	if _, exists := l.data[s]; !exists {
+		return true
 	}
 	return l.data[s] == nil
 }
@@ -36,7 +44,7 @@ func (l *ListStorage) Alloc(name string) error {
 	return nil
 }
 
-func (l *ListStorage) Append(name string, val int32) error {
+func (l *ListStorage) Append(name string, val int) error {
 	if _, exists := l.data[name]; !exists {
 		return wlinterpreter.ErrNotAllocatedBlock
 	}
@@ -49,7 +57,7 @@ func (l *ListStorage) Append(name string, val int32) error {
 	return nil
 }
 
-func (l *ListStorage) Pop(name string) (int32, error) {
+func (l *ListStorage) Pop(name string) (int, error) {
 	if _, exists := l.data[name]; !exists {
 		return 0, wlinterpreter.ErrNotAllocatedBlock
 	}
@@ -58,21 +66,29 @@ func (l *ListStorage) Pop(name string) (int32, error) {
 	}
 	var val = l.data[name].val
 
-	return val, l.remove(l.data[name])
+	return val, l.remove(name, l.data[name])
 
 }
 
 // Remove element. If element doesn't exists, returns error, otherwise change current element for its prev element.
-func (l *ListStorage) remove(el *element) error {
+func (l *ListStorage) remove(name string, el *element) error {
+	if _, exists := l.data[name]; !exists {
+		return wlinterpreter.ErrNotAllocatedBlock
+	}
 	if el == nil {
 		return ErrNothingToRemove
 	}
-	el = el.prev
+	if el.prev == nil {
+		l.data[name] = nil
+		return nil
+	}
+	el.val = el.prev.val
+	el.prev = el.prev.prev
 	return nil
 }
 
 // Last returns value of stored list
-func (l *ListStorage) Last(name string) (int32, error) {
+func (l *ListStorage) Last(name string) (int, error) {
 	if _, exists := l.data[name]; !exists {
 		return 0, wlinterpreter.ErrNotAllocatedBlock
 	}
