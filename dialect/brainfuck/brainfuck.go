@@ -161,14 +161,14 @@ func (bf *Brainfuck[S]) registerStartJumpOperator() error {
 			return fmt.Errorf(`cann't get value on %d: %w`, sm.GetPosition(bf.stack), err)
 		}
 		// If value eq zero, ignore all operations while meet ]
-		if value == 0 {
+		if value == S(0) {
 			if err := i.InternalStorage().Append(IGNORE, sm.GetPosition(bf.stack)); err != nil {
 				return fmt.Errorf(`cann't append %s with bracket "[": %w`, IGNORE, err)
 			}
 			return nil
 		}
 		// Start new subprogram
-		i.Fork()
+		i.Frame()
 		return nil
 	})
 }
@@ -193,7 +193,7 @@ func (bf *Brainfuck[S]) registerEndJumpOperator() error {
 			}
 
 			// If current value is 0, done current subprogram and go to next operator
-			if value == 0 {
+			if value == S(0) {
 				if err := i.Done(); err != nil {
 					return fmt.Errorf(`cann't close fork: %w`, err)
 				}

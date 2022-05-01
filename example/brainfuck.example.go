@@ -11,6 +11,7 @@ import (
 	"sync"
 )
 
+//goland:noinspection GoUnusedExportedFunction
 func Examlpe[S wlinterpreter.CellSize]() {
 	// Get store for internal interpreter
 	var store = list.New()

@@ -106,5 +106,5 @@ func TestListStorage_Last(t *testing.T) {
 
 func TestListStorage_Update(t *testing.T) {
 	var ls = New()
-	assert.NoError(t, ls.Update(`kiss`, 32))
+	assert.ErrorIs(t, ls.Update(`kiss`, 32), wlinterpreter.ErrNotAllocatedBlock)
 }

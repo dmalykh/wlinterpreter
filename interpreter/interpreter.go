@@ -72,7 +72,7 @@ func (i *Interpreter) InternalStorage() wlinterpreter.Storage {
 	return i.internalStorage
 }
 
-func (i *Interpreter) Fork() {
+func (i *Interpreter) Frame() {
 	var parent = *i
 	var fork = Interpreter{
 		operators:       i.operators,
